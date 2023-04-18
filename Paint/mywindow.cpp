@@ -49,17 +49,19 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     //tworze przyciski
     cleanButton = new QPushButton("Czysc");
     exitButton = new QPushButton("Wyjscie");
+    drawButton = new QPushButton("Rysuj");
     circleButton = new QPushButton("Okrag");
-    lineButton = new QPushButton("linia");
+    lineButton = new QPushButton("Linia");
     elipseButton = new QPushButton("Elipsa");
 
     fillButton = new QPushButton("wypelnij kolorem");
 
-    // Dodajemy przyciski do layoutu
+    //dodaje przyciski do layutu
     boxLayout->addWidget(cleanButton);
     boxLayout->addWidget(exitButton);
-    boxLayout->addWidget(circleButton);
     boxLayout->addWidget(lineButton);
+    boxLayout->addWidget(circleButton);
+    boxLayout->addWidget(drawButton);
     boxLayout->addWidget(elipseButton);
     boxLayout->addWidget(fillButton);
 
@@ -78,6 +80,7 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     connect(lineButton, SIGNAL(clicked()), this,SLOT(toLine()));
     connect(fillButton, SIGNAL(clicked()), this, SLOT(toFill()));
     connect(elipseButton, SIGNAL(clicked()), this, SLOT(toElipse()));
+    connect(drawButton, SIGNAL(clicked()), this, SLOT(toDraw()));
 
     //i slidera
     connect(slider, &QSlider::valueChanged, this, &MyWindow::updateN);
@@ -100,6 +103,13 @@ void MyWindow::toLine() {
 void MyWindow::toElipse() {
     fig = 3; //3 - oznacza elipse
     figura = "elipsa";
+    label2->setText("figura: " + QString::fromStdString(figura));
+    update();
+}
+
+void MyWindow::toDraw() {
+    fig = 5; //5 - oznacza rysowanie
+    figura = "rysowanie";
     label2->setText("figura: " + QString::fromStdString(figura));
     update();
 }
@@ -127,11 +137,10 @@ MyWindow::~MyWindow()
 // Funkcja "odmalowujaca" komponent idk czy przydatna
 void MyWindow::paintEvent(QPaintEvent*)
 {
-    // Obiekt klasy QPainter pozwala nam rysowac na komponentach
+    //obiekt klasy QPainter pozwala nam rysowac na komponentach
     QPainter p(this);
 
-    // Rysuje obrazek "img" w punkcie (poczX,poczY)
-    // (tu bedzie lewy gorny naroznik)
+    //rysuje obrazek "img" w punkcie (poczX,poczY)
     p.drawImage(poczX,poczY,*img);
 }
 
@@ -161,9 +170,9 @@ void MyWindow::czysc()
         // W kazdym wierszu jest "szer" pikseli (tzn. 4 * "szer" bajtow)
         for(j=0; j<szer; j++)
         {
-            ptr[szer*4*i + 4*j]=0; // Skladowa BLUE
-            ptr[szer*4*i + 4*j + 1] = 0; // Skladowa GREEN
-            ptr[szer*4*i + 4*j + 2] = 0; // Skladowa RED
+            ptr[szer*4*i + 4*j]=0;
+            ptr[szer*4*i + 4*j + 1] = 0;
+            ptr[szer*4*i + 4*j + 2] = 0;
         }
     }
 
@@ -188,33 +197,20 @@ void MyWindow::mousePressEvent(QMouseEvent *event)
     startX = x; //Przechowuje pozycje klikniecia
     startY = y;
 
-    int kolor = 0;
     unsigned char *ptr;
     ptr = img->bits();
 
-    // Sprawdzamy ktory przycisk myszy zostal klkniety
-    if(event->button() == Qt::LeftButton)
-    {
-        if(fig == 3)
-            floodFill(startX, startY);
-    }
-    else
-    {
-        if(fig == 3)
-            floodFill(startX, startY);
-    }
+    if(fig == 4)
+        floodFill(startX, startY);
 
     // Sprawdzamy czy klikniecie nastapilo w granicach rysunku
-    if ((x>=0)&&(y>=0)&&(x<szer)&&(y<wys))
-       {
-                   ptr[szer*4*y + 4*x] = kolor;
-                   ptr[szer*4*y + 4*x + 1] = kolor;
-                   ptr[szer*4*y + 4*x + 2] = kolor;
+    if((x>=0)&&(y>=0)&&(x<szer)&&(y<wys))
+    {
+        colorPixel(x, y); //koloruje pixel klikniety
 
-       }
+    }
     // Odswiezamy komponent
     update();
-
 }
 
 void MyWindow::mouseMoveEvent(QMouseEvent *event)
@@ -231,7 +227,10 @@ void MyWindow::mouseMoveEvent(QMouseEvent *event)
     //700 i 800 wielkosc okna
     if ((x>=0)&&(y>=0)&&(x<800)&&(y<700) && startX != event->x() && startY != event->y())
     {
-            paste();
+            if(fig == 5)
+                colorPixel(x, y);
+            else
+                paste();
             if(fig == 2)
                 drawLine(startX, startY, x, y);
             else if(fig == 1)
@@ -260,6 +259,8 @@ void MyWindow::mouseReleaseEvent(QMouseEvent *event)
                drawCircle(startX, startY, x, y);
            else if(fig == 3)
                drawElipse(startX, startY, x, y);
+           else if(fig == 5)
+               colorPixel(x, y);
 
            copy();
            isPressed = false;
@@ -469,11 +470,4 @@ void MyWindow::floodFill(int x, int y)
         }
     }
     update();
-}
-
-
-//przeciazony operator == idk czy tego uzywam
-bool operator==(const Point &p1, const Point &p2)
-{
-    return (p1.x == p2.x && p1.y == p2.y);
 }

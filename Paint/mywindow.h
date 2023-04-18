@@ -49,6 +49,7 @@ private:
     QPushButton *lineButton;
     QPushButton *fillButton;
     QPushButton *elipseButton;
+    QPushButton *drawButton;
 
     // Grupa przyciskow
     QGroupBox *grupa;
@@ -77,6 +78,7 @@ private slots:
     void toLine();
     void toFill();
     void toElipse();
+    void toDraw();
     void updateN(int value);
     void slot_czysc();
     void mousePressEvent(QMouseEvent *event);

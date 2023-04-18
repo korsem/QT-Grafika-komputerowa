@@ -26,21 +26,32 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     label2 = new QLabel(this);
     label2->setText("figura: " + QString::fromStdString(figura));
 
-    // Tworzymy grupe elementow
-    // Drugi parametr konstruktora to rodzic elementu
-    grupa = new QGroupBox("Sterowanie",this);
+    //slider
+    slider = new QSlider(Qt::Horizontal, this);
+    slider->setRange(3, 30); // zakres slidera
+    slider->setTickPosition(QSlider::TicksBothSides);
+    slider->setTickInterval(1);
+    int n = 3;
 
-    // Ustawiamy wymiary tej grupy i jej polozenie wzgledem glownego okna
-    grupa->setGeometry(QRect(poczX+szer+poczX,poczY,800-szer-2*poczX,poczY+200));
+    //pokazuje aktualna wartosc n
+    label = new QLabel(this);
+    label->setText("n: " + QString::number(n));
 
-    // Tworzymy nowy layout pionowy
+    //grupa elementow
+    grupa = new QGroupBox("Menu",this);
+
+    //wymiary grupy i jej polozenie wzgledem glownego okna
+    grupa->setGeometry(QRect(poczX+szer+poczX,poczY,800-szer-2*poczX,poczY+300));
+
+    //layout
     QVBoxLayout *boxLayout = new QVBoxLayout;
 
-    // Tworzymy 4 przyciski
+    //tworze przyciski
     cleanButton = new QPushButton("Czysc");
     exitButton = new QPushButton("Wyjscie");
     circleButton = new QPushButton("Okrag");
     lineButton = new QPushButton("linia");
+    elipseButton = new QPushButton("Elipsa");
 
     fillButton = new QPushButton("wypelnij kolorem");
 
@@ -49,9 +60,13 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     boxLayout->addWidget(exitButton);
     boxLayout->addWidget(circleButton);
     boxLayout->addWidget(lineButton);
+    boxLayout->addWidget(elipseButton);
+    boxLayout->addWidget(fillButton);
 
     boxLayout->addWidget(label2);
-    boxLayout->addWidget(fillButton);
+    boxLayout->addWidget(slider);
+    boxLayout->addWidget(label);
+
 
     // Dodajemy layout do grupy
     grupa->setLayout(boxLayout);
@@ -62,7 +77,10 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     connect(circleButton, SIGNAL(clicked()), this,SLOT(toCirc()));
     connect(lineButton, SIGNAL(clicked()), this,SLOT(toLine()));
     connect(fillButton, SIGNAL(clicked()), this, SLOT(toFill()));
+    connect(elipseButton, SIGNAL(clicked()), this, SLOT(toElipse()));
 
+    //i slidera
+    connect(slider, &QSlider::valueChanged, this, &MyWindow::updateN);
 }
 
 void MyWindow::toCirc() {
@@ -79,10 +97,23 @@ void MyWindow::toLine() {
     update();
 }
 
+void MyWindow::toElipse() {
+    fig = 3; //3 - oznacza elipse
+    figura = "elipsa";
+    label2->setText("figura: " + QString::fromStdString(figura));
+    update();
+}
+
 void MyWindow::toFill() {
-    fig = 3; //3 - oznacza wypelnienie
+    fig = 4; //4 - oznacza wypelnienie
     figura = "wypelnienie";
     label2->setText("figura: " + QString::fromStdString(figura));
+    update();
+}
+
+void MyWindow::updateN(int value) {
+    n = value;
+    label->setText("n: " + QString::number(n));
     update();
 }
 
@@ -206,6 +237,8 @@ void MyWindow::mouseMoveEvent(QMouseEvent *event)
             else if(fig == 1)
                 drawCircle(startX, startY, x, y);
             else if(fig == 3)
+                drawElipse(startX, startY, x, y);
+            else if(fig == 4)
                     floodFill(startX, startY);
 
     }
@@ -225,6 +258,8 @@ void MyWindow::mouseReleaseEvent(QMouseEvent *event)
                drawLine(startX, startY, x, y);
            else if(fig == 1)
                drawCircle(startX, startY, x, y);
+           else if(fig == 3)
+               drawElipse(startX, startY, x, y);
 
            copy();
            isPressed = false;
@@ -359,7 +394,7 @@ void MyWindow::drawLine(int x0, int y0, int x1, int y1)
     update();
 }
 
-//funkca rysujaca okrag
+//funkca rysuje okrag
 void MyWindow::drawCircle(int x0, int y0, int x1, int y1)
 {
     float r = sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
@@ -384,6 +419,24 @@ void MyWindow::drawCircle(int x0, int y0, int x1, int y1)
 
     // Odswiezamy komponent
     update();
+}
+
+//funkcja rysuje elipse
+void MyWindow::drawElipse(int x0, int y0, int x1, int y1)
+{
+    float a, b;
+    a = abs(x1 - x0);
+    b = abs(y1 - y0);
+    float an = 2 * M_PI / n;
+
+    float x , y = y0;
+    for(int i = 0; i < n; i++)
+    {
+        x = x0 + a * cos(i * an);
+        y = y0 + b * sin(i * an);
+
+        drawLine(x, y, x0 + a * cos((i+1) * an), y0 + b * sin((i+1) * an));
+    }
 }
 
 //funkcja wypelnia figure kolorem
@@ -417,6 +470,7 @@ void MyWindow::floodFill(int x, int y)
     }
     update();
 }
+
 
 //przeciazony operator == idk czy tego uzywam
 bool operator==(const Point &p1, const Point &p2)

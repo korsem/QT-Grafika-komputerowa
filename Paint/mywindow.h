@@ -24,6 +24,10 @@ public:
     ~MyWindow();
 
 private:
+    //do slidera elipsy
+    QSlider *slider;
+    QLabel *label;
+    int n;
 
     QLabel *label2;
 
@@ -44,6 +48,7 @@ private:
     QPushButton *circleButton;
     QPushButton *lineButton;
     QPushButton *fillButton;
+    QPushButton *elipseButton;
 
     // Grupa przyciskow
     QGroupBox *grupa;
@@ -71,6 +76,8 @@ private slots:
     void toCirc();
     void toLine();
     void toFill();
+    void toElipse();
+    void updateN(int value);
     void slot_czysc();
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -80,6 +87,7 @@ private slots:
     void paste();
     void drawLine(int x1, int y1, int x2, int y2);
     void drawCircle(int x0, int y0, int x1, int y1);
+    void drawElipse(int x0, int y0, int x1, int y1);
     void paintEvent(QPaintEvent*);
     void floodFill(int x, int y);
 };

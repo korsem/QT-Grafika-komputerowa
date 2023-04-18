@@ -10,11 +10,9 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp \
     mywindow.cpp
 
 HEADERS += \
-    mainwindow.h \
     mywindow.h
 
 # Default rules for deployment.

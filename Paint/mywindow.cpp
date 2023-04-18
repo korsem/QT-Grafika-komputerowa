@@ -1,15 +1,16 @@
 #include "mywindow.h"
 #include <QVBoxLayout>
 
+//konstruktor
 MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
 {
     // Ustawiamy tytul okna
-    setWindowTitle("basic paint");
+    setWindowTitle("basic Paint");
 
-    //Zmieniamy rozmiar okna
+    //rozmiar okna
     resize(800,700);
 
-    // Ustawiamy wymiary obrazka i wspolrzedne jego lewego gornego naroznika ramki
+    //wymiary obrazka i wspolrzedne obrazka
     szer = 600;
     wys = 600;
     poczX = 25;
@@ -18,11 +19,8 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     fig = 1; //domyslnie niech rysuje okregi
     figura = "okrag";
 
-    // Tworzymy obiekt klasy QImage, o odpowiedniej szerokosci
-    // i wysokosci. Ustawiamy format bitmapy na 32 bitowe RGB
-    // (0xffRRGGBB).
-    img = new QImage(szer,wys,QImage::Format_RGB32);
-    img2 = new QImage(szer,wys,QImage::Format_RGB32);
+    img = new QImage(szer,wys,QImage::Format_RGB32); //aktualny obraz
+    img2 = new QImage(szer,wys,QImage::Format_RGB32); //potrzebne do przechowywania kopii obrazu
 
     //pokazuje aktualna figure
     label2 = new QLabel(this);
@@ -58,17 +56,11 @@ MyWindow::MyWindow(QWidget *parent) : QWidget(parent)
     // Dodajemy layout do grupy
     grupa->setLayout(boxLayout);
 
-
-    // Laczymy sygnal emitowany po nacisnieciu przycisku "Wyjscie"
-    // ze slotem quit(). qApp to globalny wskaznik reprezentujacy aplikacje
+    //lacze buttony
     connect(exitButton,SIGNAL(clicked()),qApp,SLOT(quit()));
-
-    // Laczymy sygnaly emitowane po nacisnieciu przyciskow z odpowiednimi slotami
     connect(cleanButton,SIGNAL(clicked()),this,SLOT(slot_czysc()));
-
     connect(circleButton, SIGNAL(clicked()), this,SLOT(toCirc()));
     connect(lineButton, SIGNAL(clicked()), this,SLOT(toLine()));
-
     connect(fillButton, SIGNAL(clicked()), this, SLOT(toFill()));
 
 }
@@ -94,15 +86,14 @@ void MyWindow::toFill() {
     update();
 }
 
-// Definicja destruktora
+//destruktor
 MyWindow::~MyWindow()
 {
     delete img;
     delete img2;
 }
 
-
-// Funkcja "odmalowujaca" komponent
+// Funkcja "odmalowujaca" komponent idk czy przydatna
 void MyWindow::paintEvent(QPaintEvent*)
 {
     // Obiekt klasy QPainter pozwala nam rysowac na komponentach
@@ -114,25 +105,20 @@ void MyWindow::paintEvent(QPaintEvent*)
 }
 
 
-// Funkcja (slot) wywolywana po nacisnieciu przycisku "Czysc" (cleanButton)
+//funkcja wywolana po nacisnieciu przycisku "Czysc"
 void MyWindow::slot_czysc()
 {
-    // Funkcja czysci (zamalowuje na bialo) obszar rysowania
-    // definicja znajduje sie ponizej
     czysc();
-
-    // Funkcja "update()" powoduje ponowne "namalowanie" calego komponentu
-    // Wywoluje funkcje "paintEvent"
     update();
 }
 
-// Funkcja powoduje wyczyszczenie
+//funkcja powoduje wyczyszczenie ekranu
 void MyWindow::czysc()
 {
     // Wskaznik za pomoca, ktorego bedziemy modyfikowac obraz
     unsigned char *ptr;
 
-    // Funkcja "bits()" zwraca wskaznik do pierwszego piksela danych
+    //funkcja "bits()" zwraca wskaznik do pierwszego piksela danych
     ptr = img->bits();
 
     int i,j;
@@ -154,7 +140,7 @@ void MyWindow::czysc()
     update();
 }
 
-// Funkcja (slot) wywolywana po nacisnieciu przycisku myszy (w glownym oknie)
+//funjcha wywolana po nacisnieciu przycisku myszy
 void MyWindow::mousePressEvent(QMouseEvent *event)
 {
     // Pobieramy wspolrzedne punktu klikniecia
@@ -373,6 +359,7 @@ void MyWindow::drawLine(int x0, int y0, int x1, int y1)
     update();
 }
 
+//funkca rysujaca okrag
 void MyWindow::drawCircle(int x0, int y0, int x1, int y1)
 {
     float r = sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
@@ -398,6 +385,8 @@ void MyWindow::drawCircle(int x0, int y0, int x1, int y1)
     // Odswiezamy komponent
     update();
 }
+
+//funkcja wypelnia figure kolorem
 void MyWindow::floodFill(int x, int y)
 {
     unsigned char *ptr;
@@ -429,7 +418,7 @@ void MyWindow::floodFill(int x, int y)
     update();
 }
 
-//przeciazony operator ==
+//przeciazony operator == idk czy tego uzywam
 bool operator==(const Point &p1, const Point &p2)
 {
     return (p1.x == p2.x && p1.y == p2.y);
